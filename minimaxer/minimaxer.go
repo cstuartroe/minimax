@@ -22,6 +22,10 @@ func (m *Minimaxer[State]) Name() string {
 	return fmt.Sprintf("Minimaxer @%p", m)
 }
 
+func (m *Minimaxer[State]) FinalRemarks() string {
+	return fmt.Sprintf("I analyzed %d game states.", len(m.prospectScores))
+}
+
 func (m *Minimaxer[State]) ChooseMove(prospect base.Prospect[State]) base.Move[State] {
 	_, move := m.chooseMove(prospect)
 	return *move

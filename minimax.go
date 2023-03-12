@@ -11,6 +11,7 @@ import (
 type Player[State base.GameState] interface {
 	Name() string
 	ChooseMove(base.Prospect[State]) base.Move[State]
+	FinalRemarks() string
 }
 
 type HumanPlayer[State base.GameState] struct {
@@ -18,8 +19,8 @@ type HumanPlayer[State base.GameState] struct {
 	game base.Game[State]
 }
 
-func NewHumanPlayer[State base.GameState](name string, game base.Game[State]) *HumanPlayer[State] {
-	return &HumanPlayer[State]{name, game}
+func NewHumanPlayer[State base.GameState](name string, game base.Game[State]) HumanPlayer[State] {
+	return HumanPlayer[State]{name, game}
 }
 
 func (p HumanPlayer[State]) Name() string {
@@ -37,6 +38,10 @@ func (p HumanPlayer[State]) ChooseMove(prospect base.Prospect[State]) base.Move[
 	var choice int
 	fmt.Scan(&choice)
 	return sd.Moves[choice]
+}
+
+func (p HumanPlayer[State]) FinalRemarks() string {
+	return "Thanks for playing!"
 }
 
 type Gameplay[State base.GameState] struct {
@@ -92,6 +97,11 @@ func (gp *Gameplay[State]) Play() {
 		fmt.Printf("%s wins!\n", gp.player2.Name())
 	} else {
 		fmt.Println("It's a draw.")
+	}
+
+	fmt.Println()
+	for _, player := range []Player[State]{gp.player1, gp.player2} {
+		fmt.Printf("%s says: %q\n", player.Name(), player.FinalRemarks())
 	}
 }
 
