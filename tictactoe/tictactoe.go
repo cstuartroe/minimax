@@ -1,22 +1,26 @@
 package tictactoe
 
-import "github.com/cstuartroe/minimax/base"
+import (
+	"fmt"
+
+	"github.com/cstuartroe/minimax/base"
+)
 
 type TicTacToeSquare byte
 
 const (
 	X     TicTacToeSquare = 'X'
 	O     TicTacToeSquare = 'O'
-	Space TicTacToeSquare = ' '
+	Space TicTacToeSquare = '_'
 )
 
 type TicTacToeBoard [3][3]TicTacToeSquare
 
 func (board TicTacToeBoard) String() string {
 	out := []TicTacToeSquare{}
-	for x := 0; x < 3; x++ {
-		for y := 0; y < 3; y++ {
-			out = append(out, board[x][y])
+	for y := 0; y < 3; y++ {
+		for x := 0; x < 3; x++ {
+			out = append(out, board[y][x])
 		}
 		out = append(out, '\n')
 	}
@@ -29,7 +33,7 @@ type TicTacToeIndex struct {
 }
 
 func (b TicTacToeBoard) at(i TicTacToeIndex) TicTacToeSquare {
-	return b[i.x][i.y]
+	return b[i.y][i.x]
 }
 
 var ticTacToeRuns [][3]TicTacToeIndex = [][3]TicTacToeIndex{
@@ -60,30 +64,36 @@ func copy(board TicTacToeBoard) TicTacToeBoard {
 	out := TicTacToeBoard{}
 	for x := 0; x < 3; x++ {
 		for y := 0; y < 3; y++ {
-			out[x][y] = board[x][y]
+			out[y][x] = board[y][x]
 		}
 	}
 	return out
 }
 
-func getMoves(prospect base.Prospect[TicTacToeBoard]) []TicTacToeBoard {
+var rowNames [3]string = [3]string{"top", "middle", "bottom"}
+var columnNames [3]string = [3]string{"left", "center", "right"}
+
+func getMoves(prospect base.Prospect[TicTacToeBoard]) []base.Move[TicTacToeBoard] {
 	agentByte := O
 	if prospect.FirstAgent {
 		agentByte = X
 	}
 
-	out := []TicTacToeBoard{}
+	out := []base.Move[TicTacToeBoard]{}
 
 	if getWinner(prospect.State) != Space {
 		return out
 	}
 
-	for x := 0; x < 3; x++ {
-		for y := 0; y < 3; y++ {
-			if prospect.State[x][y] == Space {
+	for y := 0; y < 3; y++ {
+		for x := 0; x < 3; x++ {
+			if prospect.State[y][x] == Space {
 				newBoard := copy(prospect.State)
-				newBoard[x][y] = agentByte
-				out = append(out, newBoard)
+				newBoard[y][x] = agentByte
+
+				summary := fmt.Sprintf("%c to %s %s", agentByte, rowNames[y], columnNames[x])
+
+				out = append(out, base.Move[TicTacToeBoard]{Summary: summary, State: newBoard})
 			}
 		}
 	}

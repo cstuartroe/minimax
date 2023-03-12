@@ -12,7 +12,7 @@ type Minimaxer[State base.GameState] struct {
 	prospectScores map[string]int
 }
 
-func (m *Minimaxer[State]) chooseMove(prospect base.Prospect[State]) (int, *State) {
+func (m *Minimaxer[State]) chooseMove(prospect base.Prospect[State]) (int, *base.Move[State]) {
 	sd := m.game.Describe(prospect)
 
 	if len(sd.Moves) == 0 {
@@ -20,10 +20,10 @@ func (m *Minimaxer[State]) chooseMove(prospect base.Prospect[State]) (int, *Stat
 	}
 
 	score := 0
-	var chosenMove State
+	var chosenMove base.Move[State]
 
 	for i, move := range sd.Moves {
-		ps := m.getProspectScore(base.Prospect[State]{State: move, FirstAgent: !prospect.FirstAgent})
+		ps := m.getProspectScore(base.Prospect[State]{State: move.State, FirstAgent: !prospect.FirstAgent})
 		if (i == 0) || (ps > score && prospect.FirstAgent) || (ps < score && !prospect.FirstAgent) {
 			score = ps
 			chosenMove = move
@@ -75,14 +75,13 @@ func (gp *Gameplay[State]) playerMove() {
 	fmt.Println("Current state:")
 	fmt.Println(gp.currentProspect.State.String())
 	fmt.Println("Possible moves:")
-	for i, newState := range sd.Moves {
-		fmt.Println(i)
-		fmt.Println(newState.String())
+	for i, move := range sd.Moves {
+		fmt.Printf("%d: %s\n", i, move.Summary)
 	}
-	fmt.Println("Choose")
+	fmt.Print("Choose: ")
 	var choice int
 	fmt.Scan(&choice)
-	gp.makeMove(sd.Moves[choice])
+	gp.makeMove(sd.Moves[choice].State)
 }
 
 func main() {
@@ -97,7 +96,7 @@ func main() {
 			gp.playerMove()
 		} else {
 			_, newState := mx.chooseMove(gp.currentProspect)
-			gp.makeMove(*newState)
+			gp.makeMove(newState.State)
 		}
 	}
 
