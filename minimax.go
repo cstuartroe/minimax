@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/cstuartroe/minimax/base"
-	"github.com/cstuartroe/minimax/tictactoe"
+	"github.com/cstuartroe/minimax/nim"
 )
 
 type Minimaxer[State base.GameState] struct {
@@ -85,9 +85,11 @@ func (gp *Gameplay[State]) playerMove() {
 }
 
 func main() {
-	gp := NewGameplay(tictactoe.TicTacToe)
-	mx := Minimaxer[tictactoe.TicTacToeBoard]{
-		game:           tictactoe.TicTacToe,
+	game := nim.GenerateNim([]int{5, 4, 3, 2}, 0, true)
+
+	gp := NewGameplay(game)
+	mx := Minimaxer[nim.NimState]{
+		game:           game,
 		prospectScores: map[string]int{},
 	}
 
