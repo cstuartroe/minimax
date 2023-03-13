@@ -2,6 +2,7 @@ package minimaxer
 
 import (
 	"fmt"
+	"math/rand"
 
 	"github.com/cstuartroe/minimax/base"
 )
@@ -39,15 +40,19 @@ func (m *Minimaxer[State]) chooseMove(prospect base.Prospect[State]) (int, *base
 	}
 
 	score := 0
-	var chosenMove base.Move[State]
+	var goodMoves []base.Move[State]
 
 	for i, move := range sd.Moves {
 		ps := m.getProspectScore(base.Prospect[State]{State: move.State, FirstAgent: !prospect.FirstAgent})
 		if (i == 0) || (ps > score && prospect.FirstAgent) || (ps < score && !prospect.FirstAgent) {
 			score = ps
-			chosenMove = move
+			goodMoves = []base.Move[State]{move}
+		} else if ps == score {
+			goodMoves = append(goodMoves, move)
 		}
 	}
+
+	chosenMove := goodMoves[rand.Intn(len(goodMoves))]
 
 	return score, &chosenMove
 }
