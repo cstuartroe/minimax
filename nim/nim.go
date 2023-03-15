@@ -68,3 +68,23 @@ func GenerateNim(initialState []int, maxTake int, misere bool) base.Game[NimStat
 		Describe:     nimDescriber(maxTake, misere),
 	}
 }
+
+func NimStates(total int, maxPile int) [][]int {
+	if total == 0 {
+		return [][]int{{}}
+	}
+
+	if maxPile > total {
+		maxPile = total
+	}
+
+	out := [][]int{}
+
+	for lastPile := 1; lastPile <= maxPile; lastPile++ {
+		for _, piles := range NimStates(total-lastPile, lastPile) {
+			out = append(out, append(piles, lastPile))
+		}
+	}
+
+	return out
+}

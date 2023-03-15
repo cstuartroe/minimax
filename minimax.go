@@ -72,50 +72,75 @@ func (gp Gameplay[State]) done() bool {
 	return len(gp.game.Describe(gp.currentProspect).Moves) == 0
 }
 
-func (gp *Gameplay[State]) Play() {
+func (gp *Gameplay[State]) Play(verbose bool) int {
+	log := func(format string, a ...any) (n int, err error) { return 0, nil }
+	if verbose {
+		log = fmt.Printf
+	}
+
 	for !gp.done() {
 		player := gp.player2
 		if gp.currentProspect.FirstAgent {
 			player = gp.player1
 		}
 
-		fmt.Println("Current state:")
-		fmt.Println(gp.currentProspect.State.String())
+		log("Current state:\n")
+		log("%s\n", gp.currentProspect.State.String())
 		move := player.ChooseMove(gp.currentProspect)
-		fmt.Printf("%s chose %s\n\n", player.Name(), move.Summary)
+		log("%s chose %s\n\n", player.Name(), move.Summary)
 		gp.makeMove(move.State)
 	}
 
-	fmt.Println("Final state:")
-	fmt.Println(gp.currentProspect.State.String())
+	log("Final state:\n")
+	log("%s\n", gp.currentProspect.State.String())
 
 	score := gp.game.Describe(gp.currentProspect).Score
-	fmt.Printf("Game score: %d\n", score)
+	log("Game score: %d\n", score)
 	if score > 0 {
-		fmt.Printf("%s wins!\n", gp.player1.Name())
+		log("%s wins!\n", gp.player1.Name())
 	} else if score < 0 {
-		fmt.Printf("%s wins!\n", gp.player2.Name())
+		log("%s wins!\n", gp.player2.Name())
 	} else {
-		fmt.Println("It's a draw.")
+		log("It's a draw.\n")
 	}
 
-	fmt.Println()
+	log("\n")
 	for _, player := range []Player[State]{gp.player1, gp.player2} {
-		fmt.Printf("%s says: %q\n", player.Name(), player.FinalRemarks())
+		log("%s says: %q\n", player.Name(), player.FinalRemarks())
 	}
+
+	return score
+}
+
+func perfectPlay[State base.GameState](game base.Game[State]) int {
+	gp := NewGameplay(game)
+
+	gp.player1 = minimaxer.NewMinimaxer(game)
+	gp.player2 = minimaxer.NewMinimaxer(game)
+
+	return gp.Play(false)
 }
 
 func main() {
-	game := nim.GenerateNim([]int{5, 4, 3, 2}, 0, true)
+	for total := 0; total <= 12; total++ {
+		for _, piles := range nim.NimStates(total, total) {
+			fmt.Print(piles)
 
-	gp := NewGameplay(game)
+			score := perfectPlay(nim.GenerateNim(piles, 0, false))
 
-	// me := NewHumanPlayer("Conor", game)
-	mx1 := minimaxer.NewMinimaxer(game)
-	mx2 := minimaxer.NewMinimaxer(game)
+			word := "Win"
+			if score == -1 {
+				word = "Lose"
+			}
 
-	gp.player1 = mx1
-	gp.player2 = mx2
+			fmt.Printf(" %s\n", word)
 
-	gp.Play()
+			mscore := perfectPlay(nim.GenerateNim(piles, 0, true))
+
+			if score != mscore {
+				fmt.Println("Misere is different!")
+			}
+		}
+		fmt.Println()
+	}
 }
