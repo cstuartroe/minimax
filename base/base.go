@@ -25,7 +25,7 @@ type StateDescriptor[State GameState] struct {
 	Moves []Move[State]
 }
 
-type Game[State GameState] struct {
-	InitialState State
-	Describe     func(Prospect[State]) StateDescriptor[State]
+type Game[State GameState] interface {
+	InitialState() State
+	Describe(Prospect[State]) StateDescriptor[State]
 }

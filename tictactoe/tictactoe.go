@@ -101,7 +101,13 @@ func getMoves(prospect base.Prospect[TicTacToeBoard]) []base.Move[TicTacToeBoard
 	return out
 }
 
-func DescribeTicTacToe(prospect base.Prospect[TicTacToeBoard]) base.StateDescriptor[TicTacToeBoard] {
+type _TicTacToe struct{}
+
+func (t _TicTacToe) InitialState() TicTacToeBoard {
+	return [3][3]TicTacToeSquare{{Space, Space, Space}, {Space, Space, Space}, {Space, Space, Space}}
+}
+
+func (t _TicTacToe) Describe(prospect base.Prospect[TicTacToeBoard]) base.StateDescriptor[TicTacToeBoard] {
 	out := base.StateDescriptor[TicTacToeBoard]{
 		Moves: getMoves(prospect),
 	}
@@ -117,7 +123,6 @@ func DescribeTicTacToe(prospect base.Prospect[TicTacToeBoard]) base.StateDescrip
 	return out
 }
 
-var TicTacToe base.Game[TicTacToeBoard] = base.Game[TicTacToeBoard]{
-	InitialState: [3][3]TicTacToeSquare{{Space, Space, Space}, {Space, Space, Space}, {Space, Space, Space}},
-	Describe:     DescribeTicTacToe,
+func TicTacToe() base.Game[TicTacToeBoard] {
+	return _TicTacToe{}
 }

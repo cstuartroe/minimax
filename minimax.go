@@ -55,7 +55,7 @@ func NewGameplay[State base.GameState](game base.Game[State]) Gameplay[State] {
 	return Gameplay[State]{
 		game: game,
 		currentProspect: base.Prospect[State]{
-			State:      game.InitialState,
+			State:      game.InitialState(),
 			FirstAgent: true,
 		},
 	}
@@ -122,25 +122,11 @@ func perfectPlay[State base.GameState](game base.Game[State]) int {
 }
 
 func main() {
-	for total := 0; total <= 12; total++ {
-		for _, piles := range nim.NimStates(total, total) {
-			fmt.Print(piles)
+	game := nim.NimGame([]int{2, 3, 4, 5}, 0, true)
 
-			score := perfectPlay(nim.GenerateNim(piles, 0, false))
+	gp := NewGameplay(game)
+	gp.player1 = minimaxer.NewMinimaxer(game)
+	gp.player2 = NewHumanPlayer("Conor", game)
 
-			word := "Win"
-			if score == -1 {
-				word = "Lose"
-			}
-
-			fmt.Printf(" %s\n", word)
-
-			mscore := perfectPlay(nim.GenerateNim(piles, 0, true))
-
-			if score != mscore {
-				fmt.Println("Misere is different!")
-			}
-		}
-		fmt.Println()
-	}
+	gp.Play(true)
 }
