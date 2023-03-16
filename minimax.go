@@ -4,14 +4,13 @@ import (
 	"fmt"
 
 	"github.com/cstuartroe/minimax/base"
+	"github.com/cstuartroe/minimax/mancala"
 	"github.com/cstuartroe/minimax/minimaxer"
-	"github.com/cstuartroe/minimax/nim"
 )
 
 type Player[State base.GameState] interface {
 	Name() string
 	ChooseMove(base.Prospect[State]) base.Move[State]
-	FinalRemarks() string
 }
 
 type HumanPlayer[State base.GameState] struct {
@@ -36,12 +35,14 @@ func (p HumanPlayer[State]) ChooseMove(prospect base.Prospect[State]) base.Move[
 	}
 	fmt.Print("Choose: ")
 	var choice int
-	fmt.Scan(&choice)
-	return sd.Moves[choice]
-}
+	_, err := fmt.Scan(&choice)
 
-func (p HumanPlayer[State]) FinalRemarks() string {
-	return "Thanks for playing!"
+	if err != nil || choice >= len(sd.Moves) {
+		fmt.Println("Invalid entry.")
+		return p.ChooseMove(prospect)
+	}
+
+	return sd.Moves[choice]
 }
 
 type Gameplay[State base.GameState] struct {
@@ -61,10 +62,15 @@ func NewGameplay[State base.GameState](game base.Game[State]) Gameplay[State] {
 	}
 }
 
-func (gp *Gameplay[State]) makeMove(newState State) {
+func (gp *Gameplay[State]) makeMove(move base.Move[State]) {
+	nextAgent := !gp.currentProspect.FirstAgent
+	if move.RetainControl {
+		nextAgent = gp.currentProspect.FirstAgent
+	}
+
 	gp.currentProspect = base.Prospect[State]{
-		State:      newState,
-		FirstAgent: !gp.currentProspect.FirstAgent,
+		State:      move.State,
+		FirstAgent: nextAgent,
 	}
 }
 
@@ -84,11 +90,19 @@ func (gp *Gameplay[State]) Play(verbose bool) int {
 			player = gp.player1
 		}
 
+		log("%s's turn\n", player.Name())
 		log("Current state:\n")
 		log("%s\n", gp.currentProspect.State.String())
 		move := player.ChooseMove(gp.currentProspect)
-		log("%s chose %s\n\n", player.Name(), move.Summary)
-		gp.makeMove(move.State)
+		log("%s chose %s\n", player.Name(), move.Summary)
+		switch p := player.(type) {
+		case *minimaxer.Minimaxer[State]:
+			log("%s analyzed %d game states.\n", player.Name(), p.Size())
+		}
+
+		fmt.Println()
+
+		gp.makeMove(move)
 	}
 
 	log("Final state:\n")
@@ -104,29 +118,17 @@ func (gp *Gameplay[State]) Play(verbose bool) int {
 		log("It's a draw.\n")
 	}
 
-	log("\n")
-	for _, player := range []Player[State]{gp.player1, gp.player2} {
-		log("%s says: %q\n", player.Name(), player.FinalRemarks())
-	}
-
 	return score
 }
 
-func perfectPlay[State base.GameState](game base.Game[State]) int {
-	gp := NewGameplay(game)
-
-	gp.player1 = minimaxer.NewMinimaxer(game)
-	gp.player2 = minimaxer.NewMinimaxer(game)
-
-	return gp.Play(false)
-}
-
 func main() {
-	game := nim.NimGame([]int{2, 3, 4, 5}, 0, true)
+	game := mancala.MancalaGame(6, 4)
 
 	gp := NewGameplay(game)
-	gp.player1 = minimaxer.NewMinimaxer(game)
-	gp.player2 = NewHumanPlayer("Conor", game)
+	gp.player1 = minimaxer.NewMinimaxer(game, 8)
+	gp.player2 = NewHumanPlayer("website", game)
 
 	gp.Play(true)
+
+	fmt.Println()
 }

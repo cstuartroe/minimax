@@ -16,8 +16,9 @@ func (p Prospect[State]) String() string {
 }
 
 type Move[State GameState] struct {
-	Summary string
-	State   State
+	Summary       string
+	State         State
+	RetainControl bool
 }
 
 type StateDescriptor[State GameState] struct {
