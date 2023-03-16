@@ -3,7 +3,7 @@ package nim
 import (
 	"fmt"
 
-	"github.com/cstuartroe/minimax/base"
+	"github.com/cstuartroe/minimax/games"
 )
 
 type NimState []int
@@ -22,7 +22,7 @@ type nimGame struct {
 	misere       bool
 }
 
-func NimGame(initialState NimState, maxTake int, misere bool) base.Game[NimState] {
+func NimGame(initialState NimState, maxTake int, misere bool) games.Game[NimState] {
 	return nimGame{initialState, maxTake, misere}
 }
 
@@ -30,8 +30,8 @@ func (g nimGame) InitialState() NimState {
 	return g.initialState
 }
 
-func (g nimGame) Describe(prospect base.Prospect[NimState]) base.StateDescriptor[NimState] {
-	moves := []base.Move[NimState]{}
+func (g nimGame) Describe(prospect games.Prospect[NimState]) games.StateDescriptor[NimState] {
+	moves := []games.Move[NimState]{}
 
 	for i, pile := range prospect.State {
 		turnMaxTake := g.maxTake
@@ -48,7 +48,7 @@ func (g nimGame) Describe(prospect base.Prospect[NimState]) base.StateDescriptor
 
 			summary := fmt.Sprintf("Take %d from pile #%d", take, i)
 
-			moves = append(moves, base.Move[NimState]{
+			moves = append(moves, games.Move[NimState]{
 				State:   newState,
 				Summary: summary,
 			})
@@ -68,7 +68,7 @@ func (g nimGame) Describe(prospect base.Prospect[NimState]) base.StateDescriptor
 		}
 	}
 
-	return base.StateDescriptor[NimState]{
+	return games.StateDescriptor[NimState]{
 		Moves: moves,
 		Score: score,
 	}

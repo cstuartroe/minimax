@@ -3,7 +3,7 @@ package mancala
 import (
 	"fmt"
 
-	"github.com/cstuartroe/minimax/base"
+	"github.com/cstuartroe/minimax/games"
 )
 
 type mancalaPit struct {
@@ -39,7 +39,7 @@ type mancalaGame struct {
 	startCount int
 }
 
-func MancalaGame(runLength int, startCount int) base.Game[MancalaState] {
+func MancalaGame(runLength int, startCount int) games.Game[MancalaState] {
 	return mancalaGame{runLength, startCount}
 }
 
@@ -71,7 +71,7 @@ func (g mancalaGame) InitialState() MancalaState {
 	return pits
 }
 
-func mancalaMove(prospect base.Prospect[MancalaState], i int) base.Move[MancalaState] {
+func mancalaMove(prospect games.Prospect[MancalaState], i int) games.Move[MancalaState] {
 	summary := fmt.Sprintf("pick up from %s", prospect.State[i].name)
 	retainControl := false
 
@@ -111,16 +111,16 @@ func mancalaMove(prospect base.Prospect[MancalaState], i int) base.Move[MancalaS
 		}
 	}
 
-	return base.Move[MancalaState]{
+	return games.Move[MancalaState]{
 		State:         pits,
 		Summary:       summary,
 		RetainControl: retainControl,
 	}
 }
 
-func (g mancalaGame) Describe(prospect base.Prospect[MancalaState]) base.StateDescriptor[MancalaState] {
+func (g mancalaGame) Describe(prospect games.Prospect[MancalaState]) games.StateDescriptor[MancalaState] {
 	score := prospect.State[g.runLength].tokens - prospect.State[2*g.runLength+1].tokens
-	moves := []base.Move[MancalaState]{}
+	moves := []games.Move[MancalaState]{}
 
 	offset := 0
 	if !prospect.FirstAgent {
@@ -144,7 +144,7 @@ func (g mancalaGame) Describe(prospect base.Prospect[MancalaState]) base.StateDe
 			opponentStones += prospect.State[i+offset].tokens
 		}
 		if opponentStones > 0 {
-			moves = append(moves, base.Move[MancalaState]{
+			moves = append(moves, games.Move[MancalaState]{
 				Summary:       "pass",
 				State:         prospect.State,
 				RetainControl: false,
@@ -152,7 +152,7 @@ func (g mancalaGame) Describe(prospect base.Prospect[MancalaState]) base.StateDe
 		}
 	}
 
-	return base.StateDescriptor[MancalaState]{
+	return games.StateDescriptor[MancalaState]{
 		Score: score,
 		Moves: moves,
 	}

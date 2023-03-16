@@ -3,7 +3,7 @@ package tictactoe
 import (
 	"fmt"
 
-	"github.com/cstuartroe/minimax/base"
+	"github.com/cstuartroe/minimax/games"
 )
 
 type TicTacToeSquare byte
@@ -73,13 +73,13 @@ func copy(board TicTacToeBoard) TicTacToeBoard {
 var rowNames [3]string = [3]string{"top", "middle", "bottom"}
 var columnNames [3]string = [3]string{"left", "center", "right"}
 
-func getMoves(prospect base.Prospect[TicTacToeBoard]) []base.Move[TicTacToeBoard] {
+func getMoves(prospect games.Prospect[TicTacToeBoard]) []games.Move[TicTacToeBoard] {
 	agentByte := O
 	if prospect.FirstAgent {
 		agentByte = X
 	}
 
-	out := []base.Move[TicTacToeBoard]{}
+	out := []games.Move[TicTacToeBoard]{}
 
 	if getWinner(prospect.State) != Space {
 		return out
@@ -93,7 +93,7 @@ func getMoves(prospect base.Prospect[TicTacToeBoard]) []base.Move[TicTacToeBoard
 
 				summary := fmt.Sprintf("%c to %s %s", agentByte, rowNames[y], columnNames[x])
 
-				out = append(out, base.Move[TicTacToeBoard]{Summary: summary, State: newBoard})
+				out = append(out, games.Move[TicTacToeBoard]{Summary: summary, State: newBoard})
 			}
 		}
 	}
@@ -107,8 +107,8 @@ func (t _TicTacToe) InitialState() TicTacToeBoard {
 	return [3][3]TicTacToeSquare{{Space, Space, Space}, {Space, Space, Space}, {Space, Space, Space}}
 }
 
-func (t _TicTacToe) Describe(prospect base.Prospect[TicTacToeBoard]) base.StateDescriptor[TicTacToeBoard] {
-	out := base.StateDescriptor[TicTacToeBoard]{
+func (t _TicTacToe) Describe(prospect games.Prospect[TicTacToeBoard]) games.StateDescriptor[TicTacToeBoard] {
+	out := games.StateDescriptor[TicTacToeBoard]{
 		Moves: getMoves(prospect),
 	}
 
@@ -123,6 +123,6 @@ func (t _TicTacToe) Describe(prospect base.Prospect[TicTacToeBoard]) base.StateD
 	return out
 }
 
-func TicTacToe() base.Game[TicTacToeBoard] {
+func TicTacToe() games.Game[TicTacToeBoard] {
 	return _TicTacToe{}
 }
