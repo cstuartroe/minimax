@@ -15,9 +15,8 @@ type Minimaxer[State games.GameState] struct {
 
 func NewMinimaxer[State games.GameState](game games.Game[State], lookahead int) *Minimaxer[State] {
 	return &Minimaxer[State]{
-		game:           game,
-		prospectScores: map[string]int{},
-		lookahead:      lookahead,
+		game:      game,
+		lookahead: lookahead,
 	}
 }
 
@@ -33,6 +32,10 @@ func (m *Minimaxer[State]) ChooseMove(prospect games.Prospect[State]) games.Move
 	m.prospectScores = map[string]int{}
 	_, move := m.chooseMove(prospect, m.lookahead)
 	return *move
+}
+
+func (m Minimaxer[State]) Comment() string {
+	return fmt.Sprintf("I analyzed %d game states!", len(m.prospectScores))
 }
 
 func (m *Minimaxer[State]) chooseMove(prospect games.Prospect[State], searchDepth int) (int, *games.Move[State]) {

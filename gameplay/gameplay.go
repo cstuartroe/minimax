@@ -4,12 +4,12 @@ import (
 	"fmt"
 
 	"github.com/cstuartroe/minimax/games"
-	"github.com/cstuartroe/minimax/minimaxer"
 )
 
 type Player[State games.GameState] interface {
 	Name() string
 	ChooseMove(games.Prospect[State]) games.Move[State]
+	Comment() string
 }
 
 type HumanPlayer[State games.GameState] struct {
@@ -42,6 +42,10 @@ func (p HumanPlayer[State]) ChooseMove(prospect games.Prospect[State]) games.Mov
 	}
 
 	return sd.Moves[choice]
+}
+
+func (p HumanPlayer[State]) Comment() string {
+	return ""
 }
 
 type Gameplay[State games.GameState] struct {
@@ -96,9 +100,8 @@ func (gp *Gameplay[State]) Play(verbose bool) int {
 		log("%s\n", gp.currentProspect.State.String())
 		move := player.ChooseMove(gp.currentProspect)
 		log("%s chose %s\n", player.Name(), move.Summary)
-		switch p := player.(type) {
-		case *minimaxer.Minimaxer[State]:
-			log("%s analyzed %d game states.\n", player.Name(), p.Size())
+		if comment := player.Comment(); comment != "" {
+			log("%s says: %s\n", player.Name(), comment)
 		}
 
 		fmt.Println()
